@@ -19,10 +19,10 @@ class _LoginState extends State<Login> {
   TextEditingController password = TextEditingController();
 
   late SharedPreferences logindata;
-  Future<void> saveData(String userid, String password,String code,String cname) async {
+  Future<void> saveData(String userid, String password) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('jcid', code);
-    prefs.setString('jcname', cname);
+    // prefs.setString('jcid', code);
+    // prefs.setString('jcname', cname);
     prefs.setString('userid', userid);
     prefs.setString('password', password);
     prefs.setBool('isLoggedIn', true);
@@ -46,17 +46,20 @@ class _LoginState extends State<Login> {
         var data = json.decode(response.body);
 
         // Check if login was successful
-        if (data['jstatus'] == "Success") {
+        if (data["jstatus"] == "Success") {
           Get.snackbar('Login', 'Successful');
 
           // Save user data to shared preferences
-          saveData(userid.text, password.text,data['jcid'],data['jcname']);
+          saveData(userid.text, password.text);
 
-          print(data['jcid']);
+          // Set the isLoggedIn flag to true
+          logindata.setBool('isLoggedIn', true);
 
-          // Navigate to the dashboard screen with the received code
+          // Navigate to the dashboard screen
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => DashboardScreen(cname: data['jcname'])));
+            context,
+            MaterialPageRoute(builder: (context) => DashboardScreen(cname: '')),
+          );
         } else {
           Get.snackbar('Incorrect', 'Userid Or Password');
         }
