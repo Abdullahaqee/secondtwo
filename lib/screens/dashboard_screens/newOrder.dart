@@ -57,7 +57,6 @@ class NewOrderState extends State<NewOrder> {
     _loadData();
     loadData();
     initializeOrderItems(widget.recordId);
-
   }
 
   @override
