@@ -497,7 +497,7 @@ class _SaveDataState extends State<SaveData> {
                                           'Delete Order',
                                           style: TextStyle(fontSize: 13),
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           if (filteredData[reversedIndex]['upload'] != 'Yes') {
                                             Get.defaultDialog(
                                               title: 'Confirmation',
@@ -512,10 +512,13 @@ class _SaveDataState extends State<SaveData> {
                                                   CupertinoButton(
                                                     child: const Text('Confirm'),
                                                     onPressed: () async {
-                                                      LocalDatabase localDatabase =
-                                                      LocalDatabase();
-                                                      localDatabase.Deletedb(orderId);
-                                                      await fetchDataFromDatabase();
+                                                      int orderIdToDelete = filteredData[reversedIndex]['autonumber'];
+                                                      LocalDatabase localDatabase = LocalDatabase();
+                                                      await localDatabase.Deletedb(orderIdToDelete);
+                                                      setState(() {
+                                                        // Remove the deleted order from filteredData
+                                                        filteredData.removeAt(reversedIndex);
+                                                      });
                                                       Navigator.of(context).pop(true);
                                                     },
                                                   ),
@@ -524,6 +527,7 @@ class _SaveDataState extends State<SaveData> {
                                             );
                                           }
                                         },
+
                                       ),
                                     ),
                                     Container(
