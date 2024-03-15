@@ -6,6 +6,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:location/location.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../Helper/database.dart';
 import 'newOrder.dart';
 import 'package:http/http.dart' as http;
@@ -27,6 +28,8 @@ class _SaveDataState extends State<SaveData> {
   TextEditingController nameController = TextEditingController();
   bool isPostDataCalled = false;
   location_package.Location location = location_package.Location();
+  bool isUploadConfirmed = false;
+  double perc = 0;
 
 
   @override
@@ -124,6 +127,10 @@ class _SaveDataState extends State<SaveData> {
   }
 
   void postData() async {
+    setState(() {
+      isUploadConfirmed = true;
+      perc = 0;
+    });
     if (isPostDataCalled) {
       return; // If already uploading, do nothing
     }
@@ -131,6 +138,8 @@ class _SaveDataState extends State<SaveData> {
       String url = 'http://isofttouch.com/eorder/insert1.php';
 
       String currentAddress = await _getCurrentAddress();
+      int totalItems = filteredData.length;
+      int uploadedItems = 0;
 
       // Construct the data to send to the API
       for (var data in filteredData) {
@@ -178,6 +187,12 @@ class _SaveDataState extends State<SaveData> {
             print('$orderno,$customerName,$itemCode,$itemName,$quantity,$isaleman,$customerCode,$currentDate,$idate,$location');
 
             print('API Response: $post');
+            uploadedItems++;
+            double progress = 400*(uploadedItems / totalItems);
+
+            setState(() {
+              perc = progress;
+            });
 
             // Update the upload status to 'Yes' after successful API response
             if (post.statusCode == 200) {
@@ -186,7 +201,12 @@ class _SaveDataState extends State<SaveData> {
 
               // Update filteredData immediately after successful upload
             }
+
           }
+          setState(() {
+            isUploadConfirmed = false;
+            perc = 100;
+          });
         } catch (e) {
           print('Error processing data: $e');
         }
@@ -197,8 +217,6 @@ class _SaveDataState extends State<SaveData> {
       print(e.toString());
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +357,7 @@ class _SaveDataState extends State<SaveData> {
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               IconButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   Get.defaultDialog(
                                     title: 'Confirmation',
                                     content: Row(
@@ -367,6 +385,21 @@ class _SaveDataState extends State<SaveData> {
                                 },
                                 icon: Icon(Icons.add),
                               ),
+                               (!isUploadConfirmed) ? Container():
+                                   CircularPercentIndicator(
+                                    radius: 30,
+                                    animation: true,
+                                    lineWidth: 10,
+                                    percent: (perc/100), // You may set the actual progress here
+                                    progressColor: Colors.deepPurple,
+                                    backgroundColor: Colors.deepPurple.shade100,
+                                    circularStrokeCap: CircularStrokeCap.round,
+                                    center: Text(
+                                      '${perc.toStringAsFixed(100)}',
+                                      style: TextStyle(fontSize: 5, color: Colors.deepPurple),
+                                    ),
+                                  ),
+
                             ],
                           ),
                         ),
