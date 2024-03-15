@@ -55,6 +55,7 @@ dependencies:
   pull_to_refresh: any
   location: any
   geocoding: ^2.1.1
+  percent_indicator: any
 
 
 dev_dependencies:
