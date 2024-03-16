@@ -129,7 +129,6 @@ class _SaveDataState extends State<SaveData> {
   void postData() async {
     setState(() {
       isUploadConfirmed = true;
-      perc = 0;
     });
     if (isPostDataCalled) {
       return; // If already uploading, do nothing
@@ -138,8 +137,13 @@ class _SaveDataState extends State<SaveData> {
       String url = 'http://isofttouch.com/eorder/insert1.php';
 
       String currentAddress = await _getCurrentAddress();
-      int totalItems = filteredData.length;
       int uploadedItems = 0;
+
+      // Calculate the total number of items for percentage calculation
+      int totalNumberOfItems = 0;
+      for (var data in filteredData) {
+        totalNumberOfItems += (jsonDecode(data['order_data']) as List).length;
+      }
 
       // Construct the data to send to the API
       for (var data in filteredData) {
@@ -188,8 +192,9 @@ class _SaveDataState extends State<SaveData> {
 
             print('API Response: $post');
             uploadedItems++;
-            double progress = 400*(uploadedItems / totalItems);
 
+            // Calculate percentage and update the state
+            double progress = 100 * (uploadedItems / totalNumberOfItems);
             setState(() {
               perc = progress;
             });
@@ -203,20 +208,19 @@ class _SaveDataState extends State<SaveData> {
             }
 
           }
-          setState(() {
-            isUploadConfirmed = false;
-            perc = 100;
-          });
         } catch (e) {
           print('Error processing data: $e');
         }
       }
-
+      setState(() {
+        isUploadConfirmed = false;
+      });
       print("Upload complete");
     } catch (e) {
       print(e.toString());
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -385,20 +389,19 @@ class _SaveDataState extends State<SaveData> {
                                 },
                                 icon: Icon(Icons.add),
                               ),
-                               (!isUploadConfirmed) ? Container():
-                                   CircularPercentIndicator(
-                                    radius: 30,
-                                    animation: true,
-                                    lineWidth: 10,
-                                    percent: (perc/100), // You may set the actual progress here
-                                    progressColor: Colors.deepPurple,
-                                    backgroundColor: Colors.deepPurple.shade100,
-                                    circularStrokeCap: CircularStrokeCap.round,
-                                    center: Text(
-                                      '${perc.toStringAsFixed(100)}',
-                                      style: TextStyle(fontSize: 5, color: Colors.deepPurple),
-                                    ),
-                                  ),
+                              (!isUploadConfirmed) ? Container() : CircularPercentIndicator(
+                                radius: 30,
+                                animation: true,
+                                lineWidth: 10,
+                                percent: perc / 100, // Ensure that perc is divided by 100 to represent a value between 0 and 1
+                                progressColor: Colors.deepPurple,
+                                backgroundColor: Colors.deepPurple.shade100,
+                                circularStrokeCap: CircularStrokeCap.round,
+                                center: Text(
+                                  '${perc}',
+                                  style: TextStyle(fontSize: 12, color: Colors.deepPurple),
+                                ),
+                              ),
 
                             ],
                           ),
