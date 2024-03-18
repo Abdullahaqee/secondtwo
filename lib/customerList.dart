@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class CustomerList extends StatefulWidget {
   @override
   State<CustomerList> createState() => _CustomerListState();
@@ -23,7 +24,6 @@ class _CustomerListState extends State<CustomerList> {
     setState(() {
       secondScreenData = jsonDecode(jsonData);
       filteredUserData = List.from(secondScreenData);
-
     });
   }
 
@@ -31,12 +31,14 @@ class _CustomerListState extends State<CustomerList> {
     setState(() {
       filteredUserData = secondScreenData
           .where((user) =>
-      user['cid'].toString().startsWith(id.toLowerCase()) ||
-          user['cname'].toString().toLowerCase().startsWith(id.toLowerCase()))
+              user['cid'].toString().startsWith(id.toLowerCase()) ||
+              user['cname']
+                  .toString()
+                  .toLowerCase()
+                  .startsWith(id.toLowerCase()))
           .toList(); // Convert the set to a list
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
