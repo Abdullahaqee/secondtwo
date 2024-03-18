@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:location/location.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../Helper/database.dart';
 import 'newOrder.dart';
 import 'package:http/http.dart' as http;
@@ -38,34 +38,34 @@ class _SaveDataState extends State<SaveData> {
   }
 
   Future<String> _getCurrentAddress() async {
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
 
     // Check if location service is enabled, if not, request it.
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         // Handle if the user refuses to enable location service.
         throw 'Location service is disabled.';
       }
     }
 
     // Check if permission is granted, if not, request it.
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
         // Handle if the user refuses to grant location permission.
         throw 'Location permission is denied.';
       }
     }
 
     // Get the current location.
-    _locationData = await location.getLocation();
-    double latitude = _locationData.latitude!;
-    double longitude = _locationData.longitude!;
+    locationData = await location.getLocation();
+    double latitude = locationData.latitude!;
+    double longitude = locationData.longitude!;
 
 // Use geocoding to convert coordinates to address.
     List<Placemark> placemarks =
@@ -98,7 +98,6 @@ class _SaveDataState extends State<SaveData> {
 
       setState(() {});
     } catch (e) {
-      print('Error fetching data from the database: $e');
       // Handle the error or notify the user accordingly.
     }
   }
@@ -121,6 +120,33 @@ class _SaveDataState extends State<SaveData> {
     setState(() {});
   }
 
+  void _showUploadOverlay() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SpinKitCircle(color: Colors.deepPurple),
+                // Or any other loading indicator
+                SizedBox(height: 20),
+                Text('Uploading Data...'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _hideUploadOverlay() {
+    Navigator.of(context).pop();
+  }
+
   void postData() async {
     setState(() {
       isUploadConfirmed = true;
@@ -129,16 +155,17 @@ class _SaveDataState extends State<SaveData> {
       return; // If already uploading, do nothing
     }
     try {
+      _showUploadOverlay();
       String url = 'http://isofttouch.com/eorder/insert1.php';
 
       String currentAddress = await _getCurrentAddress();
-      int uploadedItems = 0;
-
-      // Calculate the total number of items for percentage calculation
-      int totalNumberOfItems = 0;
-      for (var data in filteredData) {
-        totalNumberOfItems += (jsonDecode(data['order_data']) as List).length;
-      }
+      // int uploadedItems = 0;
+      //
+      // // Calculate the total number of items for percentage calculation
+      // int totalNumberOfItems = 0;
+      // for (var data in filteredData) {
+      //   totalNumberOfItems += (jsonDecode(data['order_data']) as List).length;
+      // }
 
       // Construct the data to send to the API
       for (var data in filteredData) {
@@ -148,7 +175,6 @@ class _SaveDataState extends State<SaveData> {
 
           // Check if the item has already been uploaded
           if (uploadStatus == 'Yes') {
-            print('Item already uploaded. Skipping...');
             continue;
           }
 
@@ -182,19 +208,17 @@ class _SaveDataState extends State<SaveData> {
               'clocation': currentAddress
             });
 
-            print(
-                '$orderno,$customerName,$itemCode,$itemName,$quantity,$isaleman,$customerCode,$currentDate,$idate,$location');
 
-            print('API Response: $post');
-            uploadedItems++;
-            // Calculate percentage and update the state
-            double progress = uploadedItems / totalNumberOfItems;
-            setState(() {
-              perc = progress.clamp(0.0, 1.0); // Clamp perc value to range [0.0, 1.0]
-            });
-
-            print('Updating perc variable...');
-            print('Current value of perc: $perc');
+            // uploadedItems++;
+            // // Calculate percentage and update the state
+            // double progress = uploadedItems / totalNumberOfItems;
+            // setState(() {
+            //   perc = progress.clamp(
+            //       0.0, 1.0); // Clamp perc value to range [0.0, 1.0]
+            // });
+            //
+            // print('Updating perc variable...');
+            // print('Current value of perc: $perc');
             // Update the upload status to 'Yes' after successful API response
             if (post.statusCode == 200) {
               LocalDatabase localDatabase = LocalDatabase();
@@ -203,15 +227,16 @@ class _SaveDataState extends State<SaveData> {
             }
           }
         } catch (e) {
-          print('Error processing data: $e');
         }
       }
       setState(() {
         isUploadConfirmed = false;
       });
-      print("Upload complete");
+      _hideUploadOverlay();
+      // After the upload process is complete, dismiss the dialog
+      // Navigator.pop(context); // Close the dialog
+
     } catch (e) {
-      print(e.toString());
     }
   }
 
@@ -219,7 +244,7 @@ class _SaveDataState extends State<SaveData> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Save Data',
           // style: GoogleFonts.dancingScript(
           //   fontSize: 25,
@@ -309,350 +334,374 @@ class _SaveDataState extends State<SaveData> {
           ),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await fetchDataFromDatabase();
-        },
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredData.length,
-                itemBuilder: (context, index) {
-                  int reversedIndex = filteredData.length - 1 - index;
+      body: Stack(
+        children: [
+          // Your main content
+          RefreshIndicator(
+            onRefresh: () async {
+              await fetchDataFromDatabase();
+            },
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredData.length,
+                    itemBuilder: (context, index) {
+                      int reversedIndex = filteredData.length - 1 - index;
 
-                  int orderId = reversedIndex + 1;
-                  String Code =
-                      filteredData[reversedIndex]['customerCode']?.toString() ??
+                      int orderId = reversedIndex + 1;
+                      String Code = filteredData[reversedIndex]['customerCode']
+                              ?.toString() ??
                           'N/A';
-                  String customerName =
-                      filteredData[reversedIndex]['customerName']?.toString() ??
+                      String customerName = filteredData[reversedIndex]
+                                  ['customerName']
+                              ?.toString() ??
                           'N/A';
-                  String orderDataString =
-                      filteredData[reversedIndex]['order_data']?.toString() ??
+                      String orderDataString = filteredData[reversedIndex]
+                                  ['order_data']
+                              ?.toString() ??
                           '';
 
-                  List<Map<String, dynamic>> orderData =
-                      (jsonDecode(orderDataString) as List<dynamic>)
-                          .cast<Map<String, dynamic>>()
-                          .toList();
+                      List<Map<String, dynamic>> orderData =
+                          (jsonDecode(orderDataString) as List<dynamic>)
+                              .cast<Map<String, dynamic>>()
+                              .toList();
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    // Ensures children widgets expand horizontally
-                    children: [
-                      if (reversedIndex == filteredData.length - 1 ||
-                          !isSameDay(
-                              filteredData[reversedIndex + 1]['date_time'],
-                              filteredData[reversedIndex]['date_time']))
-                        // Date Field Container
-                        Container(
-                          // Wrap the Row inside a Container to ensure it expands horizontally
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                formattedDate(
-                                    filteredData[reversedIndex]['date_time']),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        // Ensures children widgets expand horizontally
+                        children: [
+                          if (reversedIndex == filteredData.length - 1 ||
+                              !isSameDay(
+                                  filteredData[reversedIndex + 1]['date_time'],
+                                  filteredData[reversedIndex]['date_time']))
+                            // Date Field Container
+                            Container(
+                              // Wrap the Row inside a Container to ensure it expands horizontally
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 3, horizontal: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(5),
                               ),
-                              IconButton(
-                                onPressed: () async {
-                                  Get.defaultDialog(
-                                    title: 'Confirmation',
-                                    content: Row(
-                                      children: [
-                                        CupertinoButton(
-                                          child: const Text('Cancel'),
-                                          onPressed: () {
-                                            // Close the dialog and return false
-                                            Navigator.of(context).pop(false);
-                                          },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    formattedDate(filteredData[reversedIndex]
+                                        ['date_time']),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  IconButton(
+                                    onPressed: () async {
+                                      Get.defaultDialog(
+                                        title: 'Confirmation',
+                                        content: Row(
+                                          children: [
+                                            CupertinoButton(
+                                              child: const Text('Cancel'),
+                                              onPressed: () {
+                                                // Close the dialog and return false
+                                                Navigator.of(context)
+                                                    .pop(false);
+                                              },
+                                            ),
+                                            CupertinoButton(
+                                              child: const Text('Confirm'),
+                                              onPressed: () async {
+                                                if (!isPostDataCalled) {
+                                                  postData();
+                                                  isPostDataCalled = true;
+                                                }
+                                                Navigator.of(context).pop(true);
+                                              },
+                                            ),
+                                          ],
                                         ),
-                                        CupertinoButton(
-                                          child: const Text('Confirm'),
-                                          onPressed: () async {
-                                            if (!isPostDataCalled) {
-                                              postData();
-                                              isPostDataCalled = true;
-                                            }
-                                            Navigator.of(context).pop(true);
-                                          },
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add),
+                                  ),
+                                  // (!isUploadConfirmed)
+                                  //     ? Container()
+                                  //     : CircularPercentIndicator(
+                                  //         radius: 30,
+                                  //         animation: true,
+                                  //         lineWidth: 10,
+                                  //         percent: perc.clamp(0.0, 1.0),
+                                  //         // Clamp perc value to range [0.0, 1.0]
+                                  //         // Ensure that perc reaches 100% before stopping animation
+                                  //         onAnimationEnd: () {
+                                  //           setState(() {
+                                  //             perc =
+                                  //                 1.0; // Set perc to 100% when animation completes
+                                  //           });
+                                  //         },
+                                  //         // Convert perc to percentage for display (1 to 100)
+                                  //         center: Text(
+                                  //           '${(perc * 100).toInt()}%',
+                                  //           // Display percentage from 1 to 100
+                                  //           style: TextStyle(
+                                  //             fontSize: 12,
+                                  //             color: Colors.deepPurple,
+                                  //           ),
+                                  //         ),
+                                  //         progressColor: Colors.deepPurple,
+                                  //         backgroundColor:
+                                  //             Colors.deepPurple.shade100,
+                                  //         circularStrokeCap:
+                                  //             CircularStrokeCap.round,
+                                  //       ),
+                                ],
+                              ),
+                            ),
+
+                          // Order Invoice Card Widget
+                          Card(
+                            elevation: 0,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Theme(
+                              data: Theme.of(context)
+                                  .copyWith(dividerColor: Colors.transparent),
+                              child: ExpansionTile(
+                                leading: Text(
+                                  '$orderId',
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.red),
+                                ),
+                                title: Text(
+                                  customerName,
+                                  style: const TextStyle(
+                                    color: Colors.teal,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  filteredData[reversedIndex]['upload'] == 'Yes'
+                                      ? 'Uploaded'
+                                      : '',
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                                children: [
+                                  ...orderData.map((order) {
+                                    String itemName =
+                                        order['item']?.toString() ?? 'N/A';
+                                    String quantity =
+                                        order['quantity']?.toString() ?? 'N/A';
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              itemName,
+                                              style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            child: Text(
+                                              quantity,
+                                              style: const TextStyle(
+                                                  color: Colors.red,
+                                                  fontSize: 14),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        SizedBox(
+                                          height: 23,
+                                          child: CupertinoButton(
+                                            color: Colors.green,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8),
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                            child: const Text(
+                                              'Edit Order',
+                                              style: TextStyle(fontSize: 13),
+                                            ),
+                                            onPressed: () {
+                                              if (filteredData[reversedIndex]
+                                                      ['upload'] !=
+                                                  'Yes') {
+                                                Get.defaultDialog(
+                                                  title: 'Confirmation',
+                                                  content: Row(
+                                                    children: [
+                                                      CupertinoButton(
+                                                        child: const Text(
+                                                            'Cancel'),
+                                                        onPressed: () {
+                                                          // Close the dialog and return false
+                                                          Navigator.of(context)
+                                                              .pop(false);
+                                                        },
+                                                      ),
+                                                      CupertinoButton(
+                                                        child: const Text(
+                                                            'Confirm'),
+                                                        onPressed: () async {
+                                                          if (orderData
+                                                                  .isNotEmpty &&
+                                                              customerName
+                                                                  .isNotEmpty) {
+                                                            int recordId =
+                                                                orderId;
+
+                                                            bool result =
+                                                                await Navigator
+                                                                    .push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        NewOrder(
+                                                                  Code: Code,
+                                                                  customerName:
+                                                                      customerName,
+                                                                  orderData:
+                                                                      orderData,
+                                                                  recordId:
+                                                                      recordId,
+                                                                  isedit: true,
+                                                                ),
+                                                              ),
+                                                            );
+
+                                                            if (result) {
+                                                              await fetchDataFromDatabase();
+                                                              setState(() {});
+                                                            }
+                                                          }
+                                                          Navigator.of(context)
+                                                              .pop(true);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 23,
+                                          child: CupertinoButton(
+                                            color: Colors.red,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8),
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                            child: const Text(
+                                              'Delete Order',
+                                              style: TextStyle(fontSize: 13),
+                                            ),
+                                            onPressed: () async {
+                                              if (filteredData[reversedIndex]
+                                                      ['upload'] !=
+                                                  'Yes') {
+                                                Get.defaultDialog(
+                                                  title: 'Confirmation',
+                                                  content: Row(
+                                                    children: [
+                                                      CupertinoButton(
+                                                        child: const Text(
+                                                            'Cancel'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop(false);
+                                                        },
+                                                      ),
+                                                      CupertinoButton(
+                                                        child: const Text(
+                                                            'Confirm'),
+                                                        onPressed: () async {
+                                                          int orderIdToDelete =
+                                                              filteredData[
+                                                                      reversedIndex]
+                                                                  [
+                                                                  'autonumber'];
+                                                          LocalDatabase
+                                                              localDatabase =
+                                                              LocalDatabase();
+                                                          await localDatabase
+                                                              .Deletedb(
+                                                                  orderIdToDelete);
+                                                          setState(() {
+                                                            // Remove the deleted order from filteredData
+                                                            filteredData.removeAt(
+                                                                reversedIndex);
+                                                          });
+                                                          Navigator.of(context)
+                                                              .pop(true);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.shade50,
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                          ),
+                                          child: Text(
+                                            formattedTime(
+                                                filteredData[reversedIndex]
+                                                    ['date_time']),
+                                            style: const TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w500),
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  );
-                                },
-                                icon: Icon(Icons.add),
-                              ),
-                              (!isUploadConfirmed)
-                                  ? Container()
-                                  : CircularPercentIndicator(
-                                      radius: 30,
-                                      animation: true,
-                                      lineWidth: 10,
-                                      percent: perc.clamp(0.0, 1.0),
-                                      // Clamp perc value to range [0.0, 1.0]
-                                      // Ensure that perc reaches 100% before stopping animation
-                                      onAnimationEnd: () {
-                                        setState(() {
-                                          perc =
-                                              1.0; // Set perc to 100% when animation completes
-                                        });
-                                      },
-                                      // Convert perc to percentage for display (1 to 100)
-                                      center: Text(
-                                        '${(perc * 100).toInt()}%',
-                                        // Display percentage from 1 to 100
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.deepPurple,
-                                        ),
-                                      ),
-                                      progressColor: Colors.deepPurple,
-                                      backgroundColor:
-                                          Colors.deepPurple.shade100,
-                                      circularStrokeCap:
-                                          CircularStrokeCap.round,
-                                    ),
-                            ],
-                          ),
-                        ),
-
-                      // Order Invoice Card Widget
-                      Card(
-                        elevation: 0,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Theme(
-                          data: Theme.of(context)
-                              .copyWith(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            leading: Text(
-                              '$orderId',
-                              style: const TextStyle(
-                                  fontSize: 15, color: Colors.red),
-                            ),
-                            title: Text(
-                              '$customerName',
-                              style: TextStyle(
-                                color: Colors.teal,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            trailing: Text(
-                              filteredData[reversedIndex]['upload'] == 'Yes'
-                                  ? 'Uploaded'
-                                  : '',
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            children: [
-                              ...orderData.map((order) {
-                                String itemName =
-                                    order['item']?.toString() ?? 'N/A';
-                                String quantity =
-                                    order['quantity']?.toString() ?? 'N/A';
-
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          '$itemName',
-                                          style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w400),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        child: Text(
-                                          '$quantity',
-                                          style: TextStyle(
-                                              color: Colors.red, fontSize: 14),
-                                        ),
-                                      ),
-                                    ],
                                   ),
-                                );
-                              }).toList(),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    SizedBox(
-                                      height: 23,
-                                      child: CupertinoButton(
-                                        color: Colors.green,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8),
-                                        borderRadius: BorderRadius.circular(3),
-                                        child: const Text(
-                                          'Edit Order',
-                                          style: TextStyle(fontSize: 13),
-                                        ),
-                                        onPressed: () {
-                                          if (filteredData[reversedIndex]
-                                                  ['upload'] !=
-                                              'Yes') {
-                                            Get.defaultDialog(
-                                              title: 'Confirmation',
-                                              content: Row(
-                                                children: [
-                                                  CupertinoButton(
-                                                    child: const Text('Cancel'),
-                                                    onPressed: () {
-                                                      // Close the dialog and return false
-                                                      Navigator.of(context)
-                                                          .pop(false);
-                                                    },
-                                                  ),
-                                                  CupertinoButton(
-                                                    child:
-                                                        const Text('Confirm'),
-                                                    onPressed: () async {
-                                                      if (orderData
-                                                              .isNotEmpty &&
-                                                          customerName
-                                                              .isNotEmpty) {
-                                                        int recordId = orderId;
-
-                                                        bool result =
-                                                            await Navigator
-                                                                .push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    NewOrder(
-                                                              Code: Code,
-                                                              customerName:
-                                                                  customerName,
-                                                              orderData:
-                                                                  orderData,
-                                                              recordId:
-                                                                  recordId,
-                                                              isedit: true,
-                                                            ),
-                                                          ),
-                                                        );
-
-                                                        if (result) {
-                                                          await fetchDataFromDatabase();
-                                                          setState(() {});
-                                                        }
-                                                      }
-                                                      Navigator.of(context)
-                                                          .pop(true);
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 23,
-                                      child: CupertinoButton(
-                                        color: Colors.red,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8),
-                                        borderRadius: BorderRadius.circular(3),
-                                        child: const Text(
-                                          'Delete Order',
-                                          style: TextStyle(fontSize: 13),
-                                        ),
-                                        onPressed: () async {
-                                          if (filteredData[reversedIndex]
-                                                  ['upload'] !=
-                                              'Yes') {
-                                            Get.defaultDialog(
-                                              title: 'Confirmation',
-                                              content: Row(
-                                                children: [
-                                                  CupertinoButton(
-                                                    child: const Text('Cancel'),
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop(false);
-                                                    },
-                                                  ),
-                                                  CupertinoButton(
-                                                    child:
-                                                        const Text('Confirm'),
-                                                    onPressed: () async {
-                                                      int orderIdToDelete =
-                                                          filteredData[
-                                                                  reversedIndex]
-                                                              ['autonumber'];
-                                                      LocalDatabase
-                                                          localDatabase =
-                                                          LocalDatabase();
-                                                      await localDatabase
-                                                          .Deletedb(
-                                                              orderIdToDelete);
-                                                      setState(() {
-                                                        // Remove the deleted order from filteredData
-                                                        filteredData.removeAt(
-                                                            reversedIndex);
-                                                      });
-                                                      Navigator.of(context)
-                                                          .pop(true);
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
-                                        borderRadius: BorderRadius.circular(3),
-                                      ),
-                                      child: Text(
-                                        formattedTime(
-                                            filteredData[reversedIndex]
-                                                ['date_time']),
-                                        style: const TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isUploadConfirmed)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(), // or any other widget
               ),
             ),
-          ],
-        ),
+        ],
       ),
 
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
