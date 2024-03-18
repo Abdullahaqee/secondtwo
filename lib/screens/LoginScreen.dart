@@ -19,6 +19,7 @@ class _LoginState extends State<Login> {
   TextEditingController password = TextEditingController();
 
   late SharedPreferences logindata;
+
   Future<void> saveData(String userid, String password) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // prefs.setString('jcid', code);
@@ -41,7 +42,8 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     Future<void> login() async {
       try {
-        var url = Uri.parse("http://isofttouch.com/eorder/login1.php?loginid=${userid.text}&pascode=${password.text}");
+        var url = Uri.parse(
+            "http://isofttouch.com/eorder/login1.php?loginid=${userid.text}&pascode=${password.text}");
         var response = await http.get(url);
         var data = json.decode(response.body);
 
@@ -67,7 +69,7 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content:
-              Center(child: Text('please check your internet connection')),
+                  Center(child: Text('please check your internet connection')),
               backgroundColor: Colors.blueGrey),
         );
       }
@@ -115,7 +117,7 @@ class _LoginState extends State<Login> {
                           padding: const EdgeInsets.all(17),
                           placeholder: 'User id',
                           placeholderStyle:
-                          const TextStyle(color: Colors.black45),
+                              const TextStyle(color: Colors.black45),
                           prefix: const Padding(
                             padding: EdgeInsets.only(left: 10),
                             child: Icon(Iconsax.user_edit,
@@ -148,7 +150,7 @@ class _LoginState extends State<Login> {
                           padding: const EdgeInsets.all(17),
                           placeholder: 'Password',
                           placeholderStyle:
-                          const TextStyle(color: Colors.black45),
+                              const TextStyle(color: Colors.black45),
                           prefix: const Padding(
                             padding: EdgeInsets.only(left: 10),
                             child: Icon(Iconsax.password_check,
@@ -251,7 +253,9 @@ class _LoginState extends State<Login> {
       String isaleman = _preferences.getString('jcname') ?? '';
       // User is logged in, navigate to the dashboard screen
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => DashboardScreen(cname: isaleman)));
+          context,
+          MaterialPageRoute(
+              builder: (context) => DashboardScreen(cname: isaleman)));
     }
   }
 
