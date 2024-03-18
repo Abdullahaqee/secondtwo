@@ -25,7 +25,6 @@ class _NavBarState extends State<NavBar> {
   void initState() {
     super.initState();
     initial();
-
   }
 
   Future<void> getRecords() async {
@@ -38,8 +37,7 @@ class _NavBarState extends State<NavBar> {
         UserData = List.from(Products);
         print('Products: $Products');
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> saveData(List<dynamic> data) async {
@@ -67,8 +65,7 @@ class _NavBarState extends State<NavBar> {
         filteredUserData = List.from(userdata);
         print('userdata: $userdata');
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> isaveData(List<dynamic> data) async {
@@ -94,7 +91,6 @@ class _NavBarState extends State<NavBar> {
       ready = data ?? '';
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,13 +135,15 @@ class _NavBarState extends State<NavBar> {
                                   // Show loading indicator
                                   showDialog(
                                     context: context,
-                                    barrierDismissible: false, // prevents dismissing the dialog when tapped outside
+                                    barrierDismissible: false,
+                                    // prevents dismissing the dialog when tapped outside
                                     builder: (BuildContext context) {
                                       return WillPopScope(
                                         // This ensures that the dialog can't be closed by pressing the back button
                                         onWillPop: () async => false,
                                         child: AlertDialog(
-                                          content: CircularProgressIndicator(), // Loading indicator
+                                          content:
+                                              CircularProgressIndicator(), // Loading indicator
                                         ),
                                       );
                                     },
@@ -161,7 +159,10 @@ class _NavBarState extends State<NavBar> {
                                     // Handle error
                                   } finally {
                                     // Hide loading indicator
-                                    Navigator.popUntil(context, (route) => route.isFirst); // Close all dialogs
+                                    Navigator.popUntil(
+                                        context,
+                                        (route) =>
+                                            route.isFirst); // Close all dialogs
                                   }
 
                                   // Trigger data refresh for CustomerList screen
@@ -169,7 +170,6 @@ class _NavBarState extends State<NavBar> {
                                 },
                                 child: Text('Confirm'),
                               ),
-
                             ],
                           ),
                         ],
@@ -205,7 +205,6 @@ class _NavBarState extends State<NavBar> {
             onTap: () {
               // Set the isLoggedIn flag to false
               logindata.setBool('isLoggedIn', false);
-
 
               Navigator.pushAndRemoveUntil(
                   context,
