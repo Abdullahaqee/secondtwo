@@ -230,24 +230,24 @@ class LocalDatabase {
   }
 
 // postData() async {
-  //   try {
-  //     String url = 'http://isofttouch.com/eorder/insert1.php';
-  //
-  //     // Iterate through filteredData and send each item separately
-  //
-  //       var post = await http.post(Uri.parse(url),
-  //           body: {'icucode': 'customerCode', 'icuname': 'customerName'});
-  //
-  //       var response = jsonDecode(post.body.trim()); // Remove leading/trailing whitespaces
-  //       if (response == "true") {
-  //         print('record entered');
-  //       } else {
-  //         print('failed');
-  //       }
-  //     print("upload complete");
-  //
-  //   } catch(e){
-  //     print(e.toString());
-  //   }
-  //  }
+//   try {
+//     String url = 'http://isofttouch.com/eorder/insert1.php';
+//
+//     // Iterate through filteredData and send each item separately
+//
+//       var post = await http.post(Uri.parse(url),
+//           body: {'icucode': 'customerCode', 'icuname': 'customerName'});
+//
+//       var response = jsonDecode(post.body.trim()); // Remove leading/trailing whitespaces
+//       if (response == "true") {
+//         print('record entered');
+//       } else {
+//         print('failed');
+//       }
+//     print("upload complete");
+//
+//   } catch(e){
+//     print(e.toString());
+//   }
+//  }
 }
