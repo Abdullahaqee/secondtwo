@@ -23,13 +23,11 @@ class _productListState extends State<productList> {
     loadData();
   }
 
-
   void filterData(String id) {
     setState(() {
-      UserData = Products
-          .where((user) =>
-      user['cid'].toString().contains(id.toLowerCase()) ||
-          user['cname'].toString().toLowerCase().contains(id.toLowerCase()))
+      UserData = Products.where((user) =>
+              user['cid'].toString().contains(id.toLowerCase()) ||
+              user['cname'].toString().toLowerCase().contains(id.toLowerCase()))
           .toList();
     });
   }
@@ -42,6 +40,7 @@ class _productListState extends State<productList> {
       UserData = List.from(Products);
     });
   }
+
   // void updateNameFromIdController(String idKey) {
   //   var idValue = idController.text;
   //   // Check the entered ID
@@ -66,7 +65,6 @@ class _productListState extends State<productList> {
           padding: const EdgeInsets.only(top: 5, right: 15, left: 15),
           child: Column(
             children: [
-
               Row(
                 children: [
                   InkWell(
@@ -80,12 +78,15 @@ class _productListState extends State<productList> {
                       child: const Icon(Icons.arrow_back_ios_new_outlined),
                     ),
                     onTap: () async {
-                      SharedPreferences _preferences = await SharedPreferences.getInstance();
+                      SharedPreferences _preferences =
+                          await SharedPreferences.getInstance();
                       String isaleman = _preferences.getString('jcname') ?? '';
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => DashboardScreen(cname: isaleman,)));
+                              builder: (context) => DashboardScreen(
+                                    cname: isaleman,
+                                  )));
                     },
                   ),
                   const SizedBox(width: 5),
