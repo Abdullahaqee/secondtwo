@@ -10,17 +10,15 @@ import 'dashboard_screens/productList.dart';
 import 'dashboard_screens/todaySale.dart';
 
 class DashboardScreen extends StatefulWidget {
-final String cname;
+  final String cname;
 
-const DashboardScreen ({required this.cname});
-
+  const DashboardScreen({required this.cname});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -37,8 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // }
   void loadData() async {
     SharedPreferences _preferences = await SharedPreferences.getInstance();
-    String iName =  _preferences.getString('jcname') ?? '';
-    if (iName.isEmpty){
+    String iName = _preferences.getString('jcname') ?? '';
+    if (iName.isEmpty) {
       iName = widget.cname;
     }
   }
@@ -128,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           orderData: [],
                                           recordId: 0,
                                           Code: '',
-                                      isedit: false,
+                                          isedit: false,
                                         )));
                           }),
 
@@ -172,9 +170,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => TodaySale(
-
-                                        )));
+                                    builder: (context) => TodaySale()));
                           }),
 
                       CategoryCard(
