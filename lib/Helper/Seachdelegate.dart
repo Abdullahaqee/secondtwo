@@ -48,7 +48,6 @@ class MySearchDelegate extends SearchDelegate<String> {
           leading: Text(searchResults[index]['cid'].toString()),
           title: Text(searchResults[index]['cname'].toString()),
           subtitle: Text(searchResults[index]['address1']),
-
           onTap: () {
             // Close the search delegate
             close(context, searchResults[index]['cid'].toString());
