@@ -15,14 +15,21 @@ class NewOrder extends StatefulWidget {
   final List<Map<String, dynamic>> orderData;
   final int recordId;
   final bool isedit;
-  const NewOrder({super.key, required this.customerName, required this.orderData, required this.recordId, required this.Code, required this.isedit,});
+
+  const NewOrder({
+    super.key,
+    required this.customerName,
+    required this.orderData,
+    required this.recordId,
+    required this.Code,
+    required this.isedit,
+  });
 
   @override
-  State<NewOrder> createState() =>NewOrderState();
+  State<NewOrder> createState() => NewOrderState();
 }
 
 class NewOrderState extends State<NewOrder> {
-
   late TextEditingController editQuanitty;
   late TextEditingController quantityController;
   late FocusNode txtcodeFocusNode;
@@ -68,7 +75,7 @@ class NewOrderState extends State<NewOrder> {
     txtcodeFocusNode.dispose();
     quantityController.dispose();
     productSearchFocusNode.dispose();
-    editQuanitty.dispose();// Dispose of productSearchFocusNode
+    editQuanitty.dispose(); // Dispose of productSearchFocusNode
     super.dispose();
   }
 
@@ -76,11 +83,11 @@ class NewOrderState extends State<NewOrder> {
     setState(() {
       filteredUserData = userdata
           .where((user) =>
-      user['cid'].toString().startsWith(id.toLowerCase()) ||
-          user['cname']
-              .toString()
-              .toLowerCase()
-              .startsWith(id.toLowerCase()))
+              user['cid'].toString().startsWith(id.toLowerCase()) ||
+              user['cname']
+                  .toString()
+                  .toLowerCase()
+                  .startsWith(id.toLowerCase()))
           .toList();
     });
   }
@@ -94,16 +101,18 @@ class NewOrderState extends State<NewOrder> {
     });
   }
 
-  void filterdata (String id) {
+  void filterdata(String id) {
     setState(() {
       Products = originalProducts
           .where((user) =>
-      user['cid'].toString().startsWith(id.toLowerCase()) ||
-          user['cname'].toString().toLowerCase().startsWith(id.toLowerCase()))
+              user['cid'].toString().startsWith(id.toLowerCase()) ||
+              user['cname']
+                  .toString()
+                  .toLowerCase()
+                  .startsWith(id.toLowerCase()))
           .toList();
     });
   }
-
 
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -118,7 +127,7 @@ class NewOrderState extends State<NewOrder> {
     var idValue = txtnum.text; // Check the entered ID
 
     var product = originalProducts.firstWhere(
-          (user) => user[idKey].toString().trim() == idValue.trim(),
+      (user) => user[idKey].toString().trim() == idValue.trim(),
       orElse: () => {'cid': '', 'cname': ''},
     ); // Check the found product
 
@@ -127,14 +136,14 @@ class NewOrderState extends State<NewOrder> {
     }
   }
 
-  void forCustomer (String idKey) {
+  void forCustomer(String idKey) {
     var idValue = txtcode.text;
 
-    var custom = userdata.firstWhere((user) =>
-    user[idKey].toString().trim() == idValue.trim(),
-      orElse: () => {'cid': '','cname': ''},
+    var custom = userdata.firstWhere(
+      (user) => user[idKey].toString().trim() == idValue.trim(),
+      orElse: () => {'cid': '', 'cname': ''},
     );
-    if (custom != null){
+    if (custom != null) {
       txtname.text = custom['cname'].toString();
     }
   }
@@ -150,7 +159,11 @@ class NewOrderState extends State<NewOrder> {
     widget.orderData.forEach((order) {
       String itemName = order['item']?.toString() ?? 'N/A';
       String quantity = order['quantity']?.toString() ?? 'N/A';
-      items.add(Item(item: itemName, quantity: quantity, itemCode: '',));
+      items.add(Item(
+        item: itemName,
+        quantity: quantity,
+        itemCode: '',
+      ));
     });
   }
 
@@ -183,8 +196,8 @@ class NewOrderState extends State<NewOrder> {
                         setState(() {
                           // Find the selected customer in the filteredUserData
                           var selectedCustomer = filteredUserData.firstWhere(
-                                (user) =>
-                            user['cid'].toString().trim() ==
+                            (user) =>
+                                user['cid'].toString().trim() ==
                                 selected.trim(),
                             orElse: () => {'cname: cname'},
                           );
@@ -270,10 +283,9 @@ class NewOrderState extends State<NewOrder> {
                       if (selected != null) {
                         setState(() {
                           // Find the selected product in the originalProducts list
-                          var selectedProductData =
-                          originalProducts.firstWhere(
-                                (product) =>
-                            product['cid'].toString().trim() ==
+                          var selectedProductData = originalProducts.firstWhere(
+                            (product) =>
+                                product['cid'].toString().trim() ==
                                 selected.trim(),
                             orElse: () => {},
                           );
@@ -282,9 +294,8 @@ class NewOrderState extends State<NewOrder> {
                           if (selectedProductData.isNotEmpty) {
                             txtnum.text =
                                 selectedProductData['cid'].toString().trim();
-                            txtpro.text = selectedProductData['cname']
-                                .toString()
-                                .trim();
+                            txtpro.text =
+                                selectedProductData['cname'].toString().trim();
                           }
                         });
                       }
@@ -389,7 +400,8 @@ class NewOrderState extends State<NewOrder> {
                       productSearchFocusNode.requestFocus();
                     } else {
                       // Show an error or handle the case where the quantity is not valid
-                      print('Invalid quantity. Please enter a valid quantity greater than 0.');
+                      print(
+                          'Invalid quantity. Please enter a valid quantity greater than 0.');
                     }
                   }
                 },
@@ -429,7 +441,8 @@ class NewOrderState extends State<NewOrder> {
                         productSearchFocusNode.requestFocus();
                       } else {
                         // Show an error or handle the case where the quantity is not valid
-                        print('Invalid quantity. Please enter a valid quantity greater than 0.');
+                        print(
+                            'Invalid quantity. Please enter a valid quantity greater than 0.');
                       }
                     }
                   },
@@ -445,10 +458,12 @@ class NewOrderState extends State<NewOrder> {
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Product Name',
+                Text(
+                  'Product Name',
                   style: TextStyle(color: Colors.blue, fontSize: 16),
                 ),
-                Text('Quantity',
+                Text(
+                  'Quantity',
                   style: TextStyle(color: Colors.blue, fontSize: 16),
                 ),
               ],
@@ -462,7 +477,7 @@ class NewOrderState extends State<NewOrder> {
                   itemCount: items.length,
                   itemBuilder: (context, index) => Slidable(
                     endActionPane:
-                    ActionPane(motion: const StretchMotion(), children: [
+                        ActionPane(motion: const StretchMotion(), children: [
                       // edit and delete buttons
 
                       SlidableAction(
@@ -471,42 +486,47 @@ class NewOrderState extends State<NewOrder> {
                         label: 'Edit',
                         onPressed: (context) {
                           editQuanitty.text = '';
-                          showDialog(context: context, builder: (context){
-                            return AlertDialog(
-                              title: const Text('Edit Quantity'),
-                              actions: [
-                                TextFormField(
-                                  controller: editQuanitty,
-                                  keyboardType: TextInputType.number,
-                                  onEditingComplete: (){
-                                    String newQuantity = editQuanitty.text.trim();
-                                    if (newQuantity.isNotEmpty) {
-                                      setState(() {
-                                        items[index].quantity = newQuantity;
-                                      });
-                                    }
-                                    Navigator.pop(context);
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter new quantity',
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    String newQuantity = editQuanitty.text.trim();
-                                    if (newQuantity.isNotEmpty) {
-                                      setState(() {
-                                        items[index].quantity = newQuantity;
-                                      });
-                                    }
-                                    Navigator.pop(context); // Close the bottom sheet
-                                  },
-                                  child: Text('Save'),
-                                ),
-                              ],
-                            );
-                          });
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Edit Quantity'),
+                                  actions: [
+                                    TextFormField(
+                                      controller: editQuanitty,
+                                      keyboardType: TextInputType.number,
+                                      onEditingComplete: () {
+                                        String newQuantity =
+                                            editQuanitty.text.trim();
+                                        if (newQuantity.isNotEmpty) {
+                                          setState(() {
+                                            items[index].quantity = newQuantity;
+                                          });
+                                        }
+                                        Navigator.pop(context);
+                                      },
+                                      decoration: InputDecoration(
+                                        hintText: 'Enter new quantity',
+                                      ),
+                                    ),
+                                    SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        String newQuantity =
+                                            editQuanitty.text.trim();
+                                        if (newQuantity.isNotEmpty) {
+                                          setState(() {
+                                            items[index].quantity = newQuantity;
+                                          });
+                                        }
+                                        Navigator.pop(
+                                            context); // Close the bottom sheet
+                                      },
+                                      child: Text('Save'),
+                                    ),
+                                  ],
+                                );
+                              });
                         },
                       ),
                       SlidableAction(
@@ -541,7 +561,8 @@ class NewOrderState extends State<NewOrder> {
                       child: TextField(
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          label: Text('Total Items',
+                          label: Text(
+                            'Total Items',
                             style: TextStyle(fontSize: 14),
                           ),
                         ),
@@ -556,106 +577,121 @@ class NewOrderState extends State<NewOrder> {
                     SizedBox(
                       height: 35,
                       child: CupertinoButton(
-                        onPressed: widget.isedit? null: () async {
-                          // Check if all required fields are filled
-                          if (txtcode.text.isNotEmpty && txtname.text.isNotEmpty && items.isNotEmpty) {
-                            try {
-                              // Show a confirmation dialog
-                              bool confirm = await showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Save Data'),
-                                    content: Text('Are you sure to save the data?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          // Close the dialog and return false
-                                          Navigator.of(context).pop(false);
-                                        },
-                                        child: Text('No'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          // Close the dialog and return true
-                                          Navigator.of(context).pop(true);
-                                        },
-                                        child: Text('Yes'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              // If the user confirms, proceed with saving the data
-                              if (confirm == true) {
-                                // Initialize the LocalDatabase
-                                LocalDatabase localDatabase = LocalDatabase();
-                                // Initialize the local database if not already initialized
-                                await localDatabase.initDatabase();
-                                // Convert the items to a list of Map<String, dynamic>
-                                List<Map<String, dynamic>> itemsAsMaps = items.map((item) {
-                                  return {
-                                    'Code': txtcode.text ?? '',
-                                    'Name': txtname.text ?? '',
-                                    'itemCode': item.itemCode ?? '',
-                                    'item': item.item ?? '',  // Use item.item directly from the specific item
-                                    'quantity': item.quantity ?? '',  // Use item.quantity directly from the specific item
-                                  };
-                                }).toList();
+                        onPressed: widget.isedit
+                            ? null
+                            : () async {
+                                // Check if all required fields are filled
+                                if (txtcode.text.isNotEmpty &&
+                                    txtname.text.isNotEmpty &&
+                                    items.isNotEmpty) {
+                                  try {
+                                    // Show a confirmation dialog
+                                    bool confirm = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Save Data'),
+                                          content: Text(
+                                              'Are you sure to save the data?'),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                // Close the dialog and return false
+                                                Navigator.of(context)
+                                                    .pop(false);
+                                              },
+                                              child: Text('No'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                // Close the dialog and return true
+                                                Navigator.of(context).pop(true);
+                                              },
+                                              child: Text('Yes'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    // If the user confirms, proceed with saving the data
+                                    if (confirm == true) {
+                                      // Initialize the LocalDatabase
+                                      LocalDatabase localDatabase =
+                                          LocalDatabase();
+                                      // Initialize the local database if not already initialized
+                                      await localDatabase.initDatabase();
+                                      // Convert the items to a list of Map<String, dynamic>
+                                      List<Map<String, dynamic>> itemsAsMaps =
+                                          items.map((item) {
+                                        return {
+                                          'Code': txtcode.text ?? '',
+                                          'Name': txtname.text ?? '',
+                                          'itemCode': item.itemCode ?? '',
+                                          'item': item.item ?? '',
+                                          // Use item.item directly from the specific item
+                                          'quantity': item.quantity ?? '',
+                                          // Use item.quantity directly from the specific item
+                                        };
+                                      }).toList();
 
+                                      SharedPreferences _preferences =
+                                          await SharedPreferences.getInstance();
+                                      String isaleman =
+                                          _preferences.getString('jcid') ?? '';
+                                      String iName =
+                                          _preferences.getString('jcname') ??
+                                              '';
 
-                                SharedPreferences _preferences = await SharedPreferences.getInstance();
-                                String isaleman = _preferences.getString('jcid') ?? '';
-                                String iName =  _preferences.getString('jcname') ?? '';
+                                      await localDatabase.addApiDataLocally(
+                                          txtcode.text,
+                                          txtname.text,
+                                          itemsAsMaps,
+                                          isaleman // Use item.quantity directly from the specific item
+                                          );
+                                      print(isaleman);
 
+                                      // for (var item in items) {
+                                      //   await localDatabase.addDataLocally(
+                                      //     txtcode.text,
+                                      //     txtname.text,
+                                      //     item.itemCode,
+                                      //     item.item,  // Use item.item directly from the specific item
+                                      //     item.quantity,
+                                      //   );
+                                      // }
 
+                                      await localDatabase.readalldata();
+                                      quantityController.text = '';
+                                      txtname.text = '';
+                                      txtcode.text = '';
+                                      txtnum.text = '';
+                                      txtpro.text = '';
+                                      selectedCustomer = null;
+                                      selectedProduct = null;
 
-                                await localDatabase.addApiDataLocally(
-                                    txtcode.text,
-                                    txtname.text,
-                                    itemsAsMaps,
-                                    isaleman// Use item.quantity directly from the specific item
-                                  );
-                                print(isaleman);
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                DashboardScreen(
+                                                  cname: iName,
+                                                )),
+                                      );
 
-
-                                // for (var item in items) {
-                                //   await localDatabase.addDataLocally(
-                                //     txtcode.text,
-                                //     txtname.text,
-                                //     item.itemCode,
-                                //     item.item,  // Use item.item directly from the specific item
-                                //     item.quantity,
-                                //   );
-                                // }
-
-                                await localDatabase.readalldata();
-                                quantityController.text = '';
-                                txtname.text = '';
-                                txtcode.text = '';
-                                txtnum.text = '';
-                                txtpro.text = '';
-                                selectedCustomer = null;
-                                selectedProduct = null;
-
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => DashboardScreen(cname: iName,)),
-                                );
-
-                                // print('Sale data saved to the database successfully');
-                                // print('Name: ${txtname.text}');
-                                // itemsAsMaps.forEach((item) {
-                                //   print('  Item: ${item['item']}, Quantity: ${item['quantity']}');
-                                // });
-                              }
-                            } catch (e) {
-                              print('Error saving sale data to the database: $e');
-                              // Handle the error or notify the user accordingly.
-                            }
-                            txtcodeFocusNode.requestFocus();
-                          }
-                        },
+                                      // print('Sale data saved to the database successfully');
+                                      // print('Name: ${txtname.text}');
+                                      // itemsAsMaps.forEach((item) {
+                                      //   print('  Item: ${item['item']}, Quantity: ${item['quantity']}');
+                                      // });
+                                    }
+                                  } catch (e) {
+                                    print(
+                                        'Error saving sale data to the database: $e');
+                                    // Handle the error or notify the user accordingly.
+                                  }
+                                  txtcodeFocusNode.requestFocus();
+                                }
+                              },
                         color: Color(0xff4a5759),
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         borderRadius: BorderRadius.circular(5),
@@ -674,52 +710,54 @@ class NewOrderState extends State<NewOrder> {
                       borderRadius: BorderRadius.circular(10),
                       onPressed: widget.isedit
                           ? () async {
-                        bool confirm = await Get.defaultDialog(
-                          title: 'Confirmation',
-                          content: Row(
-                            children: [
-                              CupertinoButton(
-                                child: const Text('Cancel'),
-                                onPressed: () {
-                                  // Close the dialog and return false
-                                  Navigator.of(context).pop(false);
-                                },
-                              ),
-                              CupertinoButton(
-                                child: const Text('Confirm'),
-                                onPressed: () {
-                                  Navigator.of(context).pop(true);
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true) {
-                          Navigator.pop(context, true);
+                              bool confirm = await Get.defaultDialog(
+                                title: 'Confirmation',
+                                content: Row(
+                                  children: [
+                                    CupertinoButton(
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        // Close the dialog and return false
+                                        Navigator.of(context).pop(false);
+                                      },
+                                    ),
+                                    CupertinoButton(
+                                      child: const Text('Confirm'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                Navigator.pop(context, true);
 
-                          // Use the existing instance of LocalDatabase
-                          LocalDatabase local = LocalDatabase();
+                                // Use the existing instance of LocalDatabase
+                                LocalDatabase local = LocalDatabase();
 
-                          List<Map<String, dynamic>> itemsAsMaps =
-                          items.map((item) {
-                            return {
-                              'item': item.item ?? '',
-                              'quantity': item.quantity ?? '',
-                            };
-                          }).toList();
+                                List<Map<String, dynamic>> itemsAsMaps =
+                                    items.map((item) {
+                                  return {
+                                    'item': item.item ?? '',
+                                    'quantity': item.quantity ?? '',
+                                  };
+                                }).toList();
 
-                          // Use the recordId received from the previous screen
-                          await local.Updatedata(
-                              txtcode.text, txtname.text, itemsAsMaps, widget.recordId);
-                        }
-                      }
-                          : null, // Set onPressed to null when widget.isedit is false
+                                // Use the recordId received from the previous screen
+                                await local.Updatedata(txtcode.text,
+                                    txtname.text, itemsAsMaps, widget.recordId);
+                              }
+                            }
+                          : null,
+                      // Set onPressed to null when widget.isedit is false
                       child: Row(
                         children: [
                           Image.asset('assets/icons/update.png', scale: 15),
                           Text(
                             'Update',
-                            style: TextStyle(fontSize: 15, color: Colors.teal.shade700),
+                            style: TextStyle(
+                                fontSize: 15, color: Colors.teal.shade700),
                           ),
                         ],
                       ),
@@ -733,27 +771,27 @@ class NewOrderState extends State<NewOrder> {
       ),
     );
   }
+
   Widget getRow(int index) {
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(width: 50,child: Text(items[index].itemCode),),
+          SizedBox(
+            width: 50,
+            child: Text(items[index].itemCode),
+          ),
           Expanded(
             child: Text(
               items[index].item,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
             ),
           ),
           SizedBox(
             child: Text(
               items[index].quantity,
-              style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 14),
+              style: TextStyle(color: Colors.red, fontSize: 14),
             ),
           ),
         ],
@@ -767,5 +805,5 @@ class Item {
   String item;
   String quantity;
 
-  Item({required this.item,required this.itemCode ,required this.quantity});
+  Item({required this.item, required this.itemCode, required this.quantity});
 }
